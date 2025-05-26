@@ -1,3 +1,9 @@
+# Custom files
+*.bat 
+demo_1.png
+rawdata.bin
+rawdata.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
