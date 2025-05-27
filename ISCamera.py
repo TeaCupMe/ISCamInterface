@@ -52,15 +52,8 @@ class ISCamera:
         # print("next chunk request sent")
         ser.read_until(b"\xFF\xFF\x00")
         chunk = ISParser.parseImageChunk(ser.read(CHUNK_SIZE+6))
-        # print(chunk)
-        # file.write(bytes(chunk["payload"]))
-        
-        # print(f'Chunk {chunk["chunkID"]} recieved!')
-        # makeImage()
-        if chunk['isLastChunk']!=0:
-            print("Last chunk!")
-            
         return chunk
+    
     def takeImage(self, ser: Serial):
         ser.write(b"t")
         ser.read_until(b"\xFF\xFF\x00\x00\xFF\x00")

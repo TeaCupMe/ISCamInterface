@@ -1,7 +1,7 @@
 import sys
 from qtdesigner.CM_Interface_UI import Ui_MainWindow
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QTime
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtCore import QTime
 from ISSerial import getPorts
 from ISCamera import ISCamera
 from serial import Serial
@@ -123,15 +123,17 @@ class CameraInterfaceApp(QtWidgets.QMainWindow, Ui_MainWindow):
             
             currentChunk = 0
             
-            while (currentChunk<numberOfChunks):
+            while (currentChunk<numberOfChunks-1):
                 chunk = self.camera.getNextChunk(serial)
+                self.displayDebugTextInTerminal("Chunk: " + str(chunk))
+                QtWidgets.QApplication.instance().processEvents()
                 currentChunk = chunk["chunkID"]
-                imgPart = chunk["payload"][chunk["payloadLength"]]
-                for i in range(240):
-                    imageData[240*currentChunk+i] = imgPart[currentChunk*240 + i]
+                imgPart = chunk["payload"][:chunk["payloadLength"]]
+                for i in range(chunk["payloadLength"]):
+                    imageData[240*currentChunk+i] = imgPart[i]
                 image.putdata(imageData)
                 self.pixmap_item.setPixmap(QtGui.QPixmap(ImageQt.toqpixmap(image)))
-                self.getImageBar.setValue(currentChunk/numberOfChunks)
+                self.getImageBar.setValue(int(currentChunk*100/numberOfChunks))
                 QtWidgets.QApplication.instance().processEvents()
             self.getImageBar.setValue(100)
                  
@@ -177,7 +179,7 @@ def main():
     app = QtWidgets.QApplication(sys.argv)  # Новый экземпляр QApplication
     window = CameraInterfaceApp(False, True)  # Создаём объект класса ExampleApp
     window.show()  # Показываем окно
-    app.exec_()  # и запускаем приложение
+    app.exec()  # и запускаем приложение
     
     
 if __name__ == "__main__":
