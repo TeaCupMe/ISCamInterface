@@ -3,7 +3,7 @@ import serial.tools
 import serial.tools.list_ports
 
 def getPorts():
-    return [com.upper() for com, _, _ in sorted(serial.tools.list_ports.comports())]
+    return [com for com, _, _ in sorted(serial.tools.list_ports.comports())]
 
 class ISSerial:
     ser:serial.Serial

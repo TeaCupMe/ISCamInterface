@@ -28,9 +28,16 @@ class CameraInterfaceApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setWindowIcon(QtGui.QIcon(scriptDir + os.path.sep + 'icon.png'))
         self.setupUi(self)  # Это нужно для инициализации нашего дизайна
         self.getImageBar.setValue(0)
+        self.clearLabels()
         self.updateComPortsList()
         self.updateSpeedsList()
         
+        
+    def clearLabels(self):
+        self.exposureLabel.setText("")
+        self.widthLabel.setText("")
+        self.heightLabel.setText("")
+        self.chunksLabel.setText("")
     def takePictureButtonPressed(self):
         # self.terminalTextBrowser.insertPlainText()
         self.displayDebugTextInTerminal("'Take Picture' pressed")
@@ -119,14 +126,14 @@ class CameraInterfaceApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.pixmap_item = self.scene.addPixmap(QtGui.QPixmap())
             
             image = Image.new("L", (imageProperties["width"], imageProperties["height"]))
-            imageData = [255] * (imageProperties["width"]*imageProperties["height"])
+            imageData = [0] * (imageProperties["width"]*imageProperties["height"])
             
             currentChunk = 0
             
             while (currentChunk<numberOfChunks-1):
                 chunk = self.camera.getNextChunk(serial)
-                self.displayDebugTextInTerminal("Chunk: " + str(chunk))
-                QtWidgets.QApplication.instance().processEvents()
+                self.displayDebugTextInTerminal(f"Chunk {chunk['chunkID']} received!")
+                QtWidgets.QApplication.instance().processEvents() # type: ignore
                 currentChunk = chunk["chunkID"]
                 imgPart = chunk["payload"][:chunk["payloadLength"]]
                 for i in range(chunk["payloadLength"]):
@@ -134,7 +141,7 @@ class CameraInterfaceApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 image.putdata(imageData)
                 self.pixmap_item.setPixmap(QtGui.QPixmap(ImageQt.toqpixmap(image)))
                 self.getImageBar.setValue(int(currentChunk*100/numberOfChunks))
-                QtWidgets.QApplication.instance().processEvents()
+                # QtWidgets.QApplication.instance().processEvents()
             self.getImageBar.setValue(100)
                  
             
